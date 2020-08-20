@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
 norm = pd.read_excel (r'C:\Users\lenovo\OneDrive\桌面\Physics\Pioneer Academics\Independent Project\Data\norm.xlsx')
+#create an empty dataframe to store chisq of all possible combinations
 column_names = ["c2",'c3','c4','c5',"chisq"]
 df = pd.DataFrame(columns = column_names)
 # find the minimum element larger than 1, return the idex
