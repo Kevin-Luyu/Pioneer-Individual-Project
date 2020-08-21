@@ -1,3 +1,9 @@
+"""
+The program uses the most preliminary method to find the optimal c. After taking 
+all possible combinations of c, the corresponding values are stored in a list.
+Then the optimal value is found, and another round of program starts, with range
+halved and center change to the previous optimal value.
+"""
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np

@@ -1,9 +1,24 @@
+"""
+Using multiple linear regression with constraint on coef and intercept,
+the combination with minimal residuals is found. That combination is treated
+as the starting point for a local minimizer of chi2. 
+"""
 # -*- coding: utf-8 -*-
-import numpy as np
 import pandas as pd
+import numpy as np
+from scipy.optimize import lsq_linear
 import matplotlib.pyplot as plt
 from scipy import optimize
+#read normalized, merged data
 norm = pd.read_excel (r'C:\Users\lenovo\OneDrive\桌面\Physics\Pioneer Academics\Independent Project\Data\norm.xlsx')
+#introduce the data matrix and the result vector
+#subject to lb <= x <= ub
+A=norm[['s2_norm_mu','s3_norm_mu','s4_norm_mu','s5_norm_mu']].to_numpy()
+b=norm['s1_norm_mu'].to_numpy()
+#lb and ub needs modification when more rows are added to norm
+lb=np.array([0.0,0.0,0.0,0.0],np.float64)
+ub=np.array([1.0,1.0,1.0,1.0],np.float64)
+res = lsq_linear(A, b, bounds=(lb, ub))
 known_num=norm.shape[1]-2
 def chisq(c):
     """
@@ -30,10 +45,10 @@ def chisq(c):
     chisq=np.sum(((actual.astype(np.float64)-model)**2)/(model))
     return chisq
 
-
 # use scipy.optimize.minimize to optimize the list c, starting from the best result 
 # gained at linear regression
-c0=[0.11,0.05,0.8,0.04]
+c0=res.x
+# bounds needs change when more known structures are added to norm.
 bounds=[(0,1),(0,1),(0,1),(0,1)]
 #constraint that the sum of elements in c is 1
 def con(c):
@@ -74,43 +89,3 @@ plt.set_xlabel="energy"
 plt.set_ylabel="absorption"
 plt.show()
 
-
-
-#use scipy.optimize.shgo to optimize the list c, no initial conditioned needed
-#never use (0,1) because that leads to a fail in global minimalization
-bounds=[(0.001,1),(0.001,1),(0.001,1),(0.001,1)]
-#constraint that the sum of elements in c is 1
-def con(c):
-    """
-    Parameters
-    ----------
-    c : list
-        c records the coefficients used in the model. c should have a length 
-        equal to known_num
-
-    Returns
-    -------
-    c_sum-1: float64
-             the difference the sum of all elements in c and 1
-    """
-    c_sum=0
-    for i in range (len(c)):
-        c_sum=c_sum+c[i]
-    return (c_sum-1)
-cons = {'type':'eq', 'fun': con}
-res=optimize.shgo(chisq,bounds,constraints=cons)
-print(res)
-
-#record the best result
-c=res.x
-model=np.zeros(norm.shape[0])
-for i in range(known_num):
-        name="s"+str(i+2)+"_norm_mu"
-        model=model+c[i]*norm[name].to_numpy()
-#plot the figure to compare and print the chisq using scipy.stats to verify
-plt.plot(norm["Energy"],norm["s1_norm_mu"],label="actual")
-plt.plot(norm["Energy"],model,label="predicted")
-plt.legend(loc="upper right")
-plt.set_xlabel="energy"
-plt.set_ylabel="absorption"
-plt.show()
