@@ -150,8 +150,9 @@ def norm_merge(df1,df2):
         i=i+1
     merged=pd.merge(df1,df2,how="inner",on="Energy")
     return merged
-result=norm_merge(s1,s2)
-norm=pd.DataFrame({'Energy':s1['Energy'][0:323],"s1_norm_mu":norm_merge(s1,s2[0:614])['mu_norm_x'],
+s1=s1[6:]
+s1=s1.sort_index().reset_index(drop=True)
+norm=pd.DataFrame({'Energy':s1['Energy'],"s1_norm_mu":norm_merge(s1,s2[0:614])['mu_norm_x'],
                    "s2_norm_mu":norm_merge(s1,s2[0:614])['mu_norm_y'],
                    "s3_norm_mu":norm_merge(s1,s3[0:614])['mu_norm_y'],
                    "s4_norm_mu":norm_merge(s1,s4[0:614])['mu_norm_y'],
