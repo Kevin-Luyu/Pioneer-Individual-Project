@@ -77,3 +77,4 @@ plt.legend(loc="upper right")
 plt.set_xlabel="energy"
 plt.set_ylabel="absorption"
 plt.show()
+

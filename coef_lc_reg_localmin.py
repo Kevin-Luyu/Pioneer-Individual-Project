@@ -3,6 +3,8 @@ Using multiple linear regression with constraint on coef and intercept,
 the combination with minimal residuals is found. That combination is treated
 as the starting point for a local minimizer of chi2. 
 """
+import time
+start_time = time.time()
 # -*- coding: utf-8 -*-
 import pandas as pd
 import numpy as np
@@ -19,6 +21,7 @@ b=norm['s1_norm_mu'].to_numpy()
 lb=np.array([0.0,0.0,0.0,0.0],np.float64)
 ub=np.array([1.0,1.0,1.0,1.0],np.float64)
 res = lsq_linear(A, b, bounds=(lb, ub))
+print(res)
 known_num=norm.shape[1]-2
 def chisq(c):
     """
@@ -88,4 +91,4 @@ plt.legend(loc="upper right")
 plt.set_xlabel="energy"
 plt.set_ylabel="absorption"
 plt.show()
-
+print("--- %s seconds ---" % (time.time() - start_time))
