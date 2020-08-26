@@ -10,7 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy import optimize
 #read normalized, merged data
-norm = pd.read_excel (r'C:\Users\lenovo\OneDrive\桌面\Physics\Pioneer Academics\Independent Project\Data\norm.xlsx')
+norm = pd.read_excel (r'C:\Users\lenovo\OneDrive\桌面\norm.xlsx')
 known_num=norm.shape[1]-2
 def chisq(c):
     """
@@ -41,7 +41,7 @@ def chisq(c):
 #never use (0,1) because that leads to a fail in global minimalization
     
 # bounds needs change when more known structures are added to norm.
-bounds=[(0.001,1),(0.001,1),(0.001,1),(0.001,1)]
+bounds=[(0.0001,1),(0.0001,1),(0.0001,1),(0.0001,1)]
 #constraint that the sum of elements in c is 1
 def con(c):
     """
@@ -66,6 +66,7 @@ print(res)
 
 #record the best result of c and model
 c=res.x
+print(chisq(c))
 model=np.zeros(norm.shape[0])
 for i in range(known_num):
         name="s"+str(i+2)+"_norm_mu"

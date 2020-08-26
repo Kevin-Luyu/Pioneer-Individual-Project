@@ -80,17 +80,17 @@ plt.set_xlabel="energy"
 plt.set_ylabel="absorption"
 plt.show()
 
-def normalization(df,center,midrange):
+def normalization(df,start,end):
     """
 
     Parameters
     ----------
     df : Pandas DataFrame
         df is the dataframe that is directly read from excel file.
-    center : int
-        it records the center of ranges of data taken for average when normalization
-    midrange : int
-        it records half the number of data taken for average when normalization
+    start : int
+        it records the start of data taken for average when normalization
+    end : int
+        it records the end of data taken for average when normalization
 
     Returns
     -------
@@ -99,15 +99,48 @@ def normalization(df,center,midrange):
         and normalization
 
     """
-    df_fac=np.mean(df['substracted_mu'][center-midrange:center+midrange])
+    df_fac=np.mean(df['substracted_mu'][start:end])
     df_norm_mu=df['substracted_mu']/df_fac
     return df_norm_mu
 
-s1["mu_norm"]=normalization(s1,281,25)
-s2["mu_norm"]=normalization(s2,443,50)
-s3["mu_norm"]=normalization(s3, 443, 50)
-s4["mu_norm"]=normalization(s4, 443, 50)
-s5["mu_norm"]=normalization(s5, 443, 50)
+#define the start and legth of post-edge
+energy_start=2500
+energy_end=2525
+def close_index(df,value):
+    """
+    
+
+    Parameters
+    ----------
+    df : pandas DataFrame
+        a 1-width column of DataFrame within which you want to find the 
+        closest number to value
+    value : float
+        the number that you want to approach
+
+    Returns
+    -------
+    index : int
+        such that df[index] is the closest number in df to the value input.
+
+    """
+    index=abs(df - value).idxmin(axis=1,skipna=True)
+    return index 
+s1_start=close_index(s1['Energy'],energy_start)-6
+s1_end=close_index(s1['Energy'],energy_end)+1-6
+s2_start=close_index(s2['Energy'],energy_start)
+s2_end=close_index(s2['Energy'],energy_end)+1
+s3_start=close_index(s3['Energy'],energy_start)
+s3_end=close_index(s3['Energy'],energy_end)+1
+s4_start=close_index(s4['Energy'],energy_start)
+s4_end=close_index(s4['Energy'],energy_end)+1
+s5_start=close_index(s5['Energy'],energy_start)
+s5_end=close_index(s5['Energy'],energy_end)+1
+s1["mu_norm"]=normalization(s1,close_index(s1['Energy'],energy_start)-6,close_index(s1['Energy'],energy_end)+1-6)
+s2["mu_norm"]=normalization(s2,close_index(s2['Energy'],energy_start),close_index(s2['Energy'],energy_end)+1)
+s3["mu_norm"]=normalization(s3, close_index(s3['Energy'],energy_start),close_index(s3['Energy'],energy_end)+1)
+s4["mu_norm"]=normalization(s4, close_index(s4['Energy'],energy_start),close_index(s4['Energy'],energy_end)+1)
+s5["mu_norm"]=normalization(s5, close_index(s5['Energy'],energy_start),close_index(s5['Energy'],energy_end)+1)
 
 def norm_merge(df1,df2):
     """
@@ -170,5 +203,5 @@ plt.set_ylabel="absorption"
 plt.show()
 
 
-#export the excel file
-# norm.to_excel(r'C:\Users\lenovo\OneDrive\桌面\norm.xlsx', index = False, header=True)
+# export the excel file
+norm.to_excel(r'C:\Users\lenovo\OneDrive\桌面\norm.xlsx', index = False, header=True)
