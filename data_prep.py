@@ -96,18 +96,75 @@ def normalization(df,start,end):
 
     Returns
     -------
-    df_norm_mu : Pandas DataFrame
+    [df_norm_mu] : list
+        it is a list with only 1 element df_norm_mu
         it is a DataFrame of width 1 that records the data after background substraction
         and normalization
 
     """
     df_fac=np.mean(df['substracted_mu'][start:end])
     df_norm_mu=df['substracted_mu']/df_fac
-    return df_norm_mu
+    return [df_norm_mu]
+def normalization1(df,start,end):
+    """
+    
 
+    Parameters
+    ----------
+    df : Pandas DataFrame
+        df is the dataframe that is directly read from excel file.
+    start : int
+        it records the start of data taken for regression when normalization
+    end : int
+        it records the end of data taken for regression when normalization
+
+    Returns
+    -------
+    [norm_mu,eq(df.Energy)] : list
+        it is a list with 2 elements
+        norm_mu is a DataFrame of width 1 that records the data after background substraction
+        and normalization
+        
+        eq(df.Energy) is a column pandas DataFrame of length (df.Energy).shape[0]
+        it records the associated regression linear equation
+
+    """
+    quad=np.polyfit(df.Energy[start:end],df['substracted_mu'][start:end],1)
+    eq=np.poly1d(quad)
+    norm_mu=df['substracted_mu']/eq(df.Energy)
+    return [norm_mu,eq(df.Energy)]
+
+def normalization2(df,start,end):
+    """
+    
+
+    Parameters
+    ----------
+    df : Pandas DataFrame
+        df is the dataframe that is directly read from excel file.
+    start : int
+        it records the start of data taken for regression when normalization
+    end : int
+        it records the end of data taken for regression when normalization
+
+    Returns
+    -------
+    [norm_mu,eq(df.Energy)] : list
+        it is a list with 2 elements
+        norm_mu is a DataFrame of width 1 that records the data after background substraction
+        and normalization
+        
+        eq(df.Energy) is a column pandas DataFrame of length (df.Energy).shape[0]
+        it records the associated regression quadratic equation
+
+    """
+    quad=np.polyfit(df.Energy[start:end],df['substracted_mu'][start:end],2)
+    eq=np.poly1d(quad)
+    norm_mu=df['substracted_mu']/eq(df.Energy)
+    return [norm_mu,eq(df.Energy)]
 #define the start and legth of post-edge
-energy_start=2520
-energy_end=2525
+energy_start=2510
+energy_end=2520
 def close_index(df,value):
     """
     
@@ -131,12 +188,13 @@ def close_index(df,value):
 
 s6_start=close_index(s6['Energy'],energy_start)
 s6_end=close_index(s6['Energy'],energy_end)
-s1["mu_norm"]=normalization(s1,close_index(s1['Energy'],energy_start),close_index(s1['Energy'],energy_end))
-s2["mu_norm"]=normalization(s2,close_index(s2['Energy'],energy_start),close_index(s2['Energy'],energy_end))
-s3["mu_norm"]=normalization(s3, close_index(s3['Energy'],energy_start),close_index(s3['Energy'],energy_end))
-s4["mu_norm"]=normalization(s4, close_index(s4['Energy'],energy_start),close_index(s4['Energy'],energy_end))
-s5["mu_norm"]=normalization(s5, close_index(s5['Energy'],energy_start),close_index(s5['Energy'],energy_end))
-s6["mu_norm"]=normalization(s6,s6_start,s6_end)
+
+s1["mu_norm"]=normalization1(s1,close_index(s1['Energy'],energy_start),close_index(s1['Energy'],energy_end))[0]
+s2["mu_norm"]=normalization1(s2,close_index(s2['Energy'],energy_start),close_index(s2['Energy'],energy_end))[0]
+s3["mu_norm"]=normalization1(s3, close_index(s3['Energy'],energy_start),close_index(s3['Energy'],energy_end))[0]
+s4["mu_norm"]=normalization1(s4, close_index(s4['Energy'],energy_start),close_index(s4['Energy'],energy_end))[0]
+s5["mu_norm"]=normalization1(s5, close_index(s5['Energy'],energy_start),close_index(s5['Energy'],energy_end))[0]
+s6["mu_norm"]=normalization1(s6,s6_start,s6_end)[0]
 
 #define the start and end of spectra calculating chi2
 start_energy=2461
@@ -189,8 +247,6 @@ def norm_merge(df1,df2):
         i=i+1
     merged=pd.merge(df1,df2,how="inner",on="Energy")
     return merged
-
-
 norm=pd.DataFrame({'Energy':norm_merge(s1,s2)['Energy'],"s1_norm_mu":norm_merge(s1,s2)['mu_norm_x'],
                    "s2_norm_mu":norm_merge(s1,s2)['mu_norm_y'],
                    "s3_norm_mu":norm_merge(s1,s3)['mu_norm_y'],
@@ -209,7 +265,6 @@ plt.legend(loc="upper right")
 plt.set_xlabel="energy"
 plt.set_ylabel="absorption"
 plt.show()
-
 
 # export the excel file
 norm.to_excel(r'C:\Users\lenovo\OneDrive\桌面\norm.xlsx', index = False, header=True)
