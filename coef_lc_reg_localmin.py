@@ -12,14 +12,14 @@ from scipy.optimize import lsq_linear
 import matplotlib.pyplot as plt
 from scipy import optimize
 #read normalized, merged data
-norm = pd.read_excel (r'C:\Users\lenovo\OneDrive\桌面\Physics\Pioneer Academics\Independent Project\Data\norm.xlsx')
+norm = pd.read_excel (r'C:\Users\lenovo\OneDrive\桌面\norm.xlsx')
 #introduce the data matrix and the result vector
 #subject to lb <= x <= ub
-A=norm[['s2_norm_mu','s3_norm_mu','s4_norm_mu','s5_norm_mu']].to_numpy()
+A=norm[['s2_norm_mu','s3_norm_mu','s4_norm_mu','s5_norm_mu','s6_norm_mu']].to_numpy()
 b=norm['s1_norm_mu'].to_numpy()
 #lb and ub needs modification when more rows are added to norm
-lb=np.array([0.0,0.0,0.0,0.0],np.float64)
-ub=np.array([1.0,1.0,1.0,1.0],np.float64)
+lb=np.array([0.0,0.0,0.0,0.0,0.0],np.float64)
+ub=np.array([1.0,1.0,1.0,1.0,1.0],np.float64)
 res = lsq_linear(A, b, bounds=(lb, ub))
 print(res)
 known_num=norm.shape[1]-2
@@ -52,7 +52,7 @@ def chisq(c):
 # gained at linear regression
 c0=res.x
 # bounds needs change when more known structures are added to norm.
-bounds=[(0,1),(0,1),(0,1),(0,1)]
+bounds=[(0,1),(0,1),(0,1),(0,1),(0,1)]
 #constraint that the sum of elements in c is 1
 def con(c):
     """

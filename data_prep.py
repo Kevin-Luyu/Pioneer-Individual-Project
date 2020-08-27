@@ -9,6 +9,7 @@ s2 = pd.read_excel (r'C:\Users\lenovo\OneDrive\桌面\Physics\Pioneer Academics\
 s3 = pd.read_excel (r'C:\Users\lenovo\OneDrive\桌面\Physics\Pioneer Academics\Independent Project\Data\sdbso042.xlsx')
 s4 = pd.read_excel (r'C:\Users\lenovo\OneDrive\桌面\Physics\Pioneer Academics\Independent Project\Data\sdbt029.xlsx')
 s5 = pd.read_excel (r'C:\Users\lenovo\OneDrive\桌面\Physics\Pioneer Academics\Independent Project\Data\sfeso4051.xlsx')
+s6 = pd.read_excel (r'C:\Users\lenovo\OneDrive\桌面\Physics\Pioneer Academics\Independent Project\Data\sdbso2.xlsx')
 def back_subs(df, end, num):
     """
     Parameters
@@ -67,7 +68,7 @@ s2_info=back_subs(s2,24,20)
 s3_info=back_subs(s3,68,20)
 s4_info=back_subs(s4,80,20)
 s5_info=back_subs(s5,99,20)
-
+s6_info=back_subs(s6,40,20)
 #plot a superposed figure
 space=0.065
 plt.plot(s1['Energy'],back_subs(s1,30,20)["mu_subs"]+0*space,label="sasph008")
@@ -75,6 +76,7 @@ plt.plot(s2['Energy'],back_subs(s2,24,20)["mu_subs"]+1*space,label="sdbs034")
 plt.plot(s3['Energy'],back_subs(s3,68,20)["mu_subs"]+2*space,label="sdbso042")
 plt.plot(s4['Energy'],back_subs(s4,80,20)["mu_subs"]+3*space,label="sdbt029")
 plt.plot(s5['Energy'],back_subs(s5,99,20)["mu_subs"]+4*space,label="sfeso4051")
+plt.plot(s6['Energy'],back_subs(s6,40,20)["mu_subs"]+5*space,label="sdbso2")
 plt.legend(loc="upper right")
 plt.set_xlabel="energy"
 plt.set_ylabel="absorption"
@@ -104,7 +106,7 @@ def normalization(df,start,end):
     return df_norm_mu
 
 #define the start and legth of post-edge
-energy_start=2500
+energy_start=2520
 energy_end=2525
 def close_index(df,value):
     """
@@ -126,21 +128,19 @@ def close_index(df,value):
     """
     index=abs(df - value).idxmin(axis=1,skipna=True)
     return index 
-s1_start=close_index(s1['Energy'],energy_start)-6
-s1_end=close_index(s1['Energy'],energy_end)+1-6
-s2_start=close_index(s2['Energy'],energy_start)
-s2_end=close_index(s2['Energy'],energy_end)+1
-s3_start=close_index(s3['Energy'],energy_start)
-s3_end=close_index(s3['Energy'],energy_end)+1
-s4_start=close_index(s4['Energy'],energy_start)
-s4_end=close_index(s4['Energy'],energy_end)+1
-s5_start=close_index(s5['Energy'],energy_start)
-s5_end=close_index(s5['Energy'],energy_end)+1
-s1["mu_norm"]=normalization(s1,close_index(s1['Energy'],energy_start)-6,close_index(s1['Energy'],energy_end)+1-6)
-s2["mu_norm"]=normalization(s2,close_index(s2['Energy'],energy_start),close_index(s2['Energy'],energy_end)+1)
-s3["mu_norm"]=normalization(s3, close_index(s3['Energy'],energy_start),close_index(s3['Energy'],energy_end)+1)
-s4["mu_norm"]=normalization(s4, close_index(s4['Energy'],energy_start),close_index(s4['Energy'],energy_end)+1)
-s5["mu_norm"]=normalization(s5, close_index(s5['Energy'],energy_start),close_index(s5['Energy'],energy_end)+1)
+
+s6_start=close_index(s6['Energy'],energy_start)
+s6_end=close_index(s6['Energy'],energy_end)
+s1["mu_norm"]=normalization(s1,close_index(s1['Energy'],energy_start),close_index(s1['Energy'],energy_end))
+s2["mu_norm"]=normalization(s2,close_index(s2['Energy'],energy_start),close_index(s2['Energy'],energy_end))
+s3["mu_norm"]=normalization(s3, close_index(s3['Energy'],energy_start),close_index(s3['Energy'],energy_end))
+s4["mu_norm"]=normalization(s4, close_index(s4['Energy'],energy_start),close_index(s4['Energy'],energy_end))
+s5["mu_norm"]=normalization(s5, close_index(s5['Energy'],energy_start),close_index(s5['Energy'],energy_end))
+s6["mu_norm"]=normalization(s6,s6_start,s6_end)
+
+#define the start and end of spectra calculating chi2
+start_energy=2461
+end_energy=2525
 
 def norm_merge(df1,df2):
     """
@@ -158,6 +158,8 @@ def norm_merge(df1,df2):
     Returns
     -------
     merged : Pandas DataFrame
+        first slice df1 and df2 so that they have the same starting and ending
+        energy start_energy and end_energy specified before
         based on taking averages, more rows will be added to df2 so that there is 
         a corresponding value in df2 for every energy in df1. Those rows with energy not 
         present in df1 will be deleted. merged is the DataFrame after merging 
@@ -165,6 +167,10 @@ def norm_merge(df1,df2):
         (You cannot do a nested method for norm_merge)
 
     """
+    df1=df1[close_index(df1['Energy'],start_energy):close_index(df1['Energy'],end_energy)]
+    df1=df1.sort_index().reset_index(drop=True)
+    df2=df2[close_index(df2['Energy'],start_energy):close_index(df2['Energy'],end_energy)]
+    df2=df2.sort_index().reset_index(drop=True)
     i=0
     j=0
     while((i<df1.shape[0]-1)and(j<df2.shape[0]-1)):
@@ -183,13 +189,14 @@ def norm_merge(df1,df2):
         i=i+1
     merged=pd.merge(df1,df2,how="inner",on="Energy")
     return merged
-s1=s1[6:]
-s1=s1.sort_index().reset_index(drop=True)
-norm=pd.DataFrame({'Energy':s1['Energy'],"s1_norm_mu":norm_merge(s1,s2[0:614])['mu_norm_x'],
-                   "s2_norm_mu":norm_merge(s1,s2[0:614])['mu_norm_y'],
-                   "s3_norm_mu":norm_merge(s1,s3[0:614])['mu_norm_y'],
-                   "s4_norm_mu":norm_merge(s1,s4[0:614])['mu_norm_y'],
-                   "s5_norm_mu":norm_merge(s1,s5[0:614])['mu_norm_y']})
+
+
+norm=pd.DataFrame({'Energy':norm_merge(s1,s2)['Energy'],"s1_norm_mu":norm_merge(s1,s2)['mu_norm_x'],
+                   "s2_norm_mu":norm_merge(s1,s2)['mu_norm_y'],
+                   "s3_norm_mu":norm_merge(s1,s3)['mu_norm_y'],
+                   "s4_norm_mu":norm_merge(s1,s4)['mu_norm_y'],
+                   "s5_norm_mu":norm_merge(s1,s5)['mu_norm_y'],
+                   "s6_norm_mu":norm_merge(s1,s6)['mu_norm_y']})
 
 #plot the superposed normalized merged figures
 plt.plot(norm['Energy'],norm['s1_norm_mu'],label="sasph008")
@@ -197,6 +204,7 @@ plt.plot(norm['Energy'],norm['s2_norm_mu'],label="sdbs034")
 plt.plot(norm['Energy'],norm['s3_norm_mu'],label="sdbso042")
 plt.plot(norm['Energy'],norm['s4_norm_mu'],label="sdbt029")
 plt.plot(norm['Energy'],norm['s5_norm_mu'],label="sfeso4051")
+plt.plot(norm['Energy'],norm['s6_norm_mu'],label="sdbso2")
 plt.legend(loc="upper right")
 plt.set_xlabel="energy"
 plt.set_ylabel="absorption"
