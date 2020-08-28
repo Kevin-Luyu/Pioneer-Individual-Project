@@ -163,8 +163,8 @@ def normalization2(df,start,end):
     norm_mu=df['substracted_mu']/eq(df.Energy)
     return [norm_mu,eq(df.Energy)]
 #define the start and legth of post-edge
-energy_start=2510
-energy_end=2520
+energy_start=2520
+energy_end=2550
 def close_index(df,value):
     """
     
