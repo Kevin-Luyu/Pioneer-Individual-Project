@@ -32,12 +32,6 @@ def inflection(energy,df):
     index=np.where(-slope_min-slope==0)[0]
     return energy[index].item()
 
-"""norm['s2_norm_mu']=norm['s2_norm_mu']-atan_known(norm.Energy,norm['s2_norm_mu'])
-norm['s3_norm_mu']=norm['s3_norm_mu']-atan_known(norm.Energy,norm['s3_norm_mu'])
-norm['s4_norm_mu']=norm['s4_norm_mu']-atan_known(norm.Energy,norm['s4_norm_mu'])
-norm['s5_norm_mu']=norm['s5_norm_mu']-atan_known(norm.Energy,norm['s5_norm_mu'])
-norm['s6_norm_mu']=norm['s6_norm_mu']-atan_known(norm.Energy,norm['s6_norm_mu'])
-"""
 arctan_mod=StepModel(form='atan',prefix='arctan_')
 paras=arctan_mod.make_params()
 def make_lor(df,num,center,length):
