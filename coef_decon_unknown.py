@@ -47,11 +47,11 @@ lor6=LorentzianModel(prefix='l6_')
 model=atan2+atan3+atan4+atan5+atan6+lor2+lor3+lor4+lor5+lor6
 paras=model.make_params()
 #set values of center and sigma for arctangent steps
-paras['atan2_center'].set(value=2471.8,vary=False)
-paras['atan3_center'].set(value=2474.647,vary=False)
-paras['atan4_center'].set(value=2472.553,vary=False)
-paras['atan5_center'].set(value=2480.952,vary=False)
-paras['atan6_center'].set(value=2477.498,vary=False)
+paras['atan2_center'].set(value=inflection(norm.Energy,norm['s2_norm_mu']),vary=False)
+paras['atan3_center'].set(value=inflection(norm.Energy,norm['s3_norm_mu']),vary=False)
+paras['atan4_center'].set(value=inflection(norm.Energy,norm['s4_norm_mu']),vary=False)
+paras['atan5_center'].set(value=inflection(norm.Energy,norm['s5_norm_mu']),vary=False)
+paras['atan6_center'].set(value=inflection(norm.Energy,norm['s6_norm_mu']),vary=False)
 paras['atan2_sigma'].set(expr='0.25959158*atan2_amplitude')
 paras['atan3_sigma'].set(expr='0.02740968*atan3_amplitude')
 paras['atan4_sigma'].set(expr='0.5073644*atan4_amplitude')
@@ -75,17 +75,17 @@ paras.update(lor6.guess(norm['s6_norm_mu'],x=norm['Energy'],center=2478.62882))
 paras['l6_center'].set(value=2478.62882,min=2478.62882-length,max=2478.62882+length)
 
 #put the constraint on arc tangent steps 
-tot_area=paras['l2_amplitude'].value*paras['l2_sigma'].value
-tot_area+=paras['l3_amplitude'].value*paras['l3_sigma'].value
-tot_area+=paras['l4_amplitude'].value*paras['l4_sigma'].value
-tot_area+=paras['l5_amplitude'].value*paras['l5_sigma'].value
-tot_area+=paras['l6_amplitude'].value*paras['l6_sigma'].value
+tot_area=paras['l2_amplitude'].value
+tot_area+=paras['l3_amplitude'].value
+tot_area+=paras['l4_amplitude'].value
+tot_area+=paras['l5_amplitude'].value
+tot_area+=paras['l6_amplitude'].value
 paras.add('tot_area',value=tot_area)
-paras['atan2_amplitude'].set(expr='l2_amplitude*l2_sigma/tot_area')
-paras['atan3_amplitude'].set(expr='l3_amplitude*l3_sigma/tot_area')
-paras['atan4_amplitude'].set(expr='l4_amplitude*l4_sigma/tot_area')
-paras['atan5_amplitude'].set(expr='l5_amplitude*l5_sigma/tot_area')
-paras['atan6_amplitude'].set(expr='l6_amplitude*l6_sigma/tot_area')
+paras['atan2_amplitude'].set(expr='l2_amplitude/tot_area')
+paras['atan3_amplitude'].set(expr='l3_amplitude/tot_area')
+paras['atan4_amplitude'].set(expr='l4_amplitude/tot_area')
+paras['atan5_amplitude'].set(expr='l5_amplitude/tot_area')
+paras['atan6_amplitude'].set(expr='l6_amplitude/tot_area')
 
 out=model.fit(norm['s1_norm_mu'],paras,x=norm.Energy)
 print(out.fit_report())
