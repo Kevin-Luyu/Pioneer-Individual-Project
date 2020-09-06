@@ -19,8 +19,8 @@ s4 = pd.read_excel (r'C:\Users\lenovo\OneDrive\桌面\Physics\Pioneer Academics\
 s5 = pd.read_excel (r'C:\Users\lenovo\OneDrive\桌面\Physics\Pioneer Academics\Independent Project\Data\sfeso4051.xlsx')
 s6 = pd.read_excel (r'C:\Users\lenovo\OneDrive\桌面\Physics\Pioneer Academics\Independent Project\Data\sdbso2.xlsx')
 #define the start and legth of post-edge
-for energy_start in [2510,2520]:
-    for energy_end in [2530,2540,2550,2560,2570]:
+for energy_start in [2510,2515,2520]:
+    for energy_end in [2515,2520,2525,2530,2535]:
         if energy_end > energy_start:
             def back_subs(df, end, num):
                 """
@@ -199,12 +199,12 @@ for energy_start in [2510,2520]:
             s6_start=close_index(s6['Energy'],energy_start)
             s6_end=close_index(s6['Energy'],energy_end)
             
-            s1["mu_norm"]=normalization1(s1,close_index(s1['Energy'],energy_start),close_index(s1['Energy'],energy_end))[0]
-            s2["mu_norm"]=normalization1(s2,close_index(s2['Energy'],energy_start),close_index(s2['Energy'],energy_end))[0]
-            s3["mu_norm"]=normalization1(s3, close_index(s3['Energy'],energy_start),close_index(s3['Energy'],energy_end))[0]
-            s4["mu_norm"]=normalization1(s4, close_index(s4['Energy'],energy_start),close_index(s4['Energy'],energy_end))[0]
-            s5["mu_norm"]=normalization1(s5, close_index(s5['Energy'],energy_start),close_index(s5['Energy'],energy_end))[0]
-            s6["mu_norm"]=normalization1(s6,s6_start,s6_end)[0]
+            s1["mu_norm"]=normalization(s1,close_index(s1['Energy'],energy_start),close_index(s1['Energy'],energy_end))[0]
+            s2["mu_norm"]=normalization(s2,close_index(s2['Energy'],energy_start),close_index(s2['Energy'],energy_end))[0]
+            s3["mu_norm"]=normalization(s3, close_index(s3['Energy'],energy_start),close_index(s3['Energy'],energy_end))[0]
+            s4["mu_norm"]=normalization(s4, close_index(s4['Energy'],energy_start),close_index(s4['Energy'],energy_end))[0]
+            s5["mu_norm"]=normalization(s5, close_index(s5['Energy'],energy_start),close_index(s5['Energy'],energy_end))[0]
+            s6["mu_norm"]=normalization(s6,s6_start,s6_end)[0]
             
             #define the start and end of spectra calculating chi2
             start_energy=2461
