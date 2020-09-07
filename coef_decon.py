@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import time
+start_time = time.time()
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -145,13 +147,13 @@ def show_decon_known(df,center):
         axes[1].plot(norm.Energy,comps[name],label=lb)
     axes[1].plot(norm.Energy, comps['arctan_'], label='arctangent component')
     axes[1].legend(loc='best')
-"""  
+
 # deconvolute for s2
 paras['arctan_center'].set(value=inflection(norm.Energy,norm['s2_norm_mu']),vary=False)
 paras['arctan_amplitude'].set(value=1.0,vary=False)
 paras['arctan_sigma'].set(value=1.0,min=0)
 show_decon_known(norm['s2_norm_mu'],[2472.5,2475.4,2478.9,2483.2])
-"""
+
 #deconvolve for s3
 paras['arctan_center'].set(value=inflection(norm.Energy,norm['s3_norm_mu']),vary=False)
 paras['arctan_sigma'].set(value=1.0,min=0.01)
@@ -177,4 +179,5 @@ show_decon_known(norm['s6_norm_mu'],[2478.79,2484.32,2494.86])
 """
 plt.show()
 toaster = ToastNotifier()
-toaster.show_toast("Program Terminated Successfully","Please Check the result")
+msga="Time used: "+str(time.time() - start_time)+"s. "+"Python Program has calculated the coefficients using deconvolution successfully."
+toaster.show_toast("Program Terminated Successfully",msga)
