@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 from scipy import optimize
 from scipy import stats
 from lmfit.models import StepModel, LorentzianModel
+import win32com.client
+import winsound
+from win10toast import ToastNotifier
 norm = pd.read_excel (r'C:\Users\lenovo\OneDrive\桌面\norm.xlsx')
 def inflection(energy,df):
     """
@@ -142,18 +145,21 @@ def show_decon_known(df,center):
         axes[1].plot(norm.Energy,comps[name],label=lb)
     axes[1].plot(norm.Energy, comps['arctan_'], label='arctangent component')
     axes[1].legend(loc='best')
-    
+"""  
 # deconvolute for s2
 paras['arctan_center'].set(value=inflection(norm.Energy,norm['s2_norm_mu']),vary=False)
 paras['arctan_amplitude'].set(value=1.0,vary=False)
 paras['arctan_sigma'].set(value=1.0,min=0)
 show_decon_known(norm['s2_norm_mu'],[2472.5,2475.4,2478.9,2483.2])
-
+"""
 #deconvolve for s3
 paras['arctan_center'].set(value=inflection(norm.Energy,norm['s3_norm_mu']),vary=False)
-paras['arctan_sigma'].set(value=1.0,min=0)
+paras['arctan_sigma'].set(value=1.0,min=0.01)
 show_decon_known(norm['s3_norm_mu'],[2475.26,2478.20,2489.90,2484.52])
+# s=stats.chisquare(norm['s3_norm_mu'],f_exp=decon_known(norm['s3_norm_mu'],[2475.26,2478.20,2489.90,2484.52]))
 
+# print(s)
+"""
 #deconvolve for s4
 paras['arctan_center'].set(value=inflection(norm.Energy,norm['s4_norm_mu']),vary=False)
 paras['arctan_sigma'].set(value=1.0,min=0)
@@ -168,5 +174,7 @@ show_decon_known(norm['s5_norm_mu'],[2481.76,2497.41])
 paras['arctan_center'].set(value=inflection(norm.Energy,norm['s6_norm_mu']),vary=False)
 paras['arctan_sigma'].set(value=1.0,min=0)
 show_decon_known(norm['s6_norm_mu'],[2478.79,2484.32,2494.86])
-
+"""
 plt.show()
+toaster = ToastNotifier()
+toaster.show_toast("Program Terminated Successfully","Please Check the result")

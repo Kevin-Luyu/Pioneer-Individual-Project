@@ -8,6 +8,7 @@ from sklearn.linear_model import LinearRegression
 from lmfit.models import StepModel, LorentzianModel
 import win32com.client
 import winsound
+from win10toast import ToastNotifier
 #import excel files and construct numpy array
 res_coef=pd.DataFrame(columns=['Post-edge Energy Range','sdbs034(0)',
                                            'sdbt029(0)','dbso042(+2)','sdbso2(+2)',
@@ -19,8 +20,8 @@ s4 = pd.read_excel (r'C:\Users\lenovo\OneDrive\桌面\Physics\Pioneer Academics\
 s5 = pd.read_excel (r'C:\Users\lenovo\OneDrive\桌面\Physics\Pioneer Academics\Independent Project\Data\sfeso4051.xlsx')
 s6 = pd.read_excel (r'C:\Users\lenovo\OneDrive\桌面\Physics\Pioneer Academics\Independent Project\Data\sdbso2.xlsx')
 #define the start and legth of post-edge
-for energy_start in [2510,2515,2520]:
-    for energy_end in [2515,2520,2525,2530,2535]:
+for energy_start in [2515]:
+    for energy_end in [2520]:
         if energy_end > energy_start:
             def back_subs(df, end, num):
                 """
@@ -208,7 +209,7 @@ for energy_start in [2510,2515,2520]:
             
             #define the start and end of spectra calculating chi2
             start_energy=2461
-            end_energy=2525
+            end_energy=2490
             
             def norm_merge(df1,df2):
                 """
@@ -316,18 +317,18 @@ for energy_start in [2510,2515,2520]:
             lor5=LorentzianModel(prefix='l5_')
             lor6=LorentzianModel(prefix='l6_')
             model=atan2+atan3+atan4+atan5+atan6+lor2+lor3+lor4+lor5+lor6
-            model.set_param_hint('l2_amplitude', min=0)
-            model.set_param_hint('l3_amplitude', min=0)
-            model.set_param_hint('l4_amplitude', min=0)
-            model.set_param_hint('l5_amplitude', min=0)
-            model.set_param_hint('l6_amplitude', min=0)
+            model.set_param_hint('l2_amplitude', min=0.0)
+            model.set_param_hint('l3_amplitude', min=0.0)
+            model.set_param_hint('l4_amplitude', min=0.0)
+            model.set_param_hint('l5_amplitude', min=0.0)
+            model.set_param_hint('l6_amplitude', min=0.0)
             paras_un=model.make_params()
             #put constraints on the amplitude
-            paras_un['l2_amplitude'].set(min=0)
-            paras_un['l3_amplitude'].set(min=0)
-            paras_un['l4_amplitude'].set(min=0)
-            paras_un['l5_amplitude'].set(min=0)
-            paras_un['l6_amplitude'].set(min=0)
+            paras_un['l2_amplitude'].set(min=0.0)
+            paras_un['l3_amplitude'].set(min=0.0)
+            paras_un['l4_amplitude'].set(min=0.0)
+            paras_un['l5_amplitude'].set(min=0.0)
+            paras_un['l6_amplitude'].set(min=0.0)
             def make_lor(df,num,center,length):
                 """
                 This method do a single-peak Lorentzian deconvolution for a given dataframe
@@ -359,8 +360,8 @@ for energy_start in [2510,2515,2520]:
                 paras.update(model.guess(df,x=norm.Energy,center=center[num]))
                 name=pref+'center'
                 paras[name].set(value=center[num],min=center[num]-length,max=center[num]+length)
-                paras[pref+'amplitude'].set(min=0)
-                paras[pref+'sigma'].set(min=0)
+                paras[pref+'amplitude'].set(min=0.0)
+                paras[pref+'sigma'].set(min=0.0)
                 return {'model':model,'paras':paras}
             def decon_known(df,center):
                 """
@@ -386,15 +387,15 @@ for energy_start in [2510,2515,2520]:
                 """
                 arctan_mod=StepModel(form='atan',prefix='arctan_')
                 paras.update(arctan_mod.make_params())
-                paras['arctan_center'].set(value=inflection(norm.Energy,df),vary=False,min=0)
+                paras['arctan_center'].set(value=inflection(norm.Energy,df),vary=False,min=0.0)
                 paras['arctan_amplitude'].set(value=1.0,vary=False)
-                paras['arctan_sigma'].set(value=1.0,min=0)
+                paras['arctan_sigma'].set(value=1.0,min=0.01)
                 mod=arctan_mod
                 for i in range(len(center)):
                     this=make_lor(df,i,center,2.0)['model']
                     mod=mod+this
                     paras.update(make_lor(df,i,center,2.0)['paras'])
-                out=mod.fit(df,params=paras,x=norm.Energy,weights=df)
+                out=mod.fit(df,params=paras,x=norm.Energy)
                 return {'out':out}
             
             # print(decon_known(norm['s2_norm_mu'],[2472.5,2475.4,2478.9,2483.2]).fit_report())
@@ -436,12 +437,13 @@ for energy_start in [2510,2515,2520]:
                     axes[1].plot(norm.Energy,comps[name],label=lb)
                 axes[1].plot(norm.Energy, comps['arctan_'], label='arctangent component')
                 axes[1].legend(loc='best')
-                return {'ratio':((out.params['arctan_sigma'].value)/(out.params['arctan_amplitude'].value)),'center':out.params['l0_center'],'amp':out.params['l0_amplitude'].value}
+                return {'ratio':((out.params['arctan_sigma'].value)),
+                        'center':out.params['l0_center'],'amp':out.params['l0_amplitude'].value,}
             
             # deconvolute for s2
             paras['arctan_center'].set(value=inflection(norm.Energy,norm['s2_norm_mu']),vary=False)
             paras['arctan_amplitude'].set(value=1.0,vary=False)
-            paras['arctan_sigma'].set(value=1.0,min=0)
+            paras['arctan_sigma'].set(value=1.0,min=0.01)
             s2_info=show_decon_known(norm['s2_norm_mu'],[2472.5,2475.4,2478.9,2483.2])
             s2_ratio,s2_amp=s2_info['ratio'],s2_info['amp']
             s2_cen=s2_info['center']
@@ -452,7 +454,7 @@ for energy_start in [2510,2515,2520]:
             
             #deconvolve for s3
             paras['arctan_center'].set(value=inflection(norm.Energy,norm['s3_norm_mu']),vary=False)
-            paras['arctan_sigma'].set(value=1.0,min=0)
+            paras['arctan_sigma'].set(value=1.0,min=0.01)
             s3_info = show_decon_known(norm['s3_norm_mu'],[2475.26,2478.20,2489.90,2484.52])
             s3_ratio,s3_amp=s3_info['ratio'],s3_info['amp']
             paras_un.add('s3_ratio',value=s3_ratio,vary=False)
@@ -462,7 +464,7 @@ for energy_start in [2510,2515,2520]:
             
             #deconvolve for s4
             paras['arctan_center'].set(value=inflection(norm.Energy,norm['s4_norm_mu']),vary=False)
-            paras['arctan_sigma'].set(value=1.0,min=0)
+            paras['arctan_sigma'].set(value=1.0,min=0.01)
             s4_info=show_decon_known(norm['s4_norm_mu'],[2473.05,2476.22,2481.59])
             s4_ratio,s4_amp=s4_info['ratio'],s4_info['amp']
             paras_un.add('s4_ratio',value=s4_ratio,vary=False)
@@ -472,7 +474,7 @@ for energy_start in [2510,2515,2520]:
             
             #deconvolve for s5
             paras['arctan_center'].set(value=inflection(norm.Energy,norm['s5_norm_mu']),vary=False)
-            paras['arctan_sigma'].set(value=1.0,min=0)
+            paras['arctan_sigma'].set(value=1.0,min=0.01)
             s5_info=show_decon_known(norm['s5_norm_mu'],[2481.76,2497.41])
             s5_ratio,s5_amp=s5_info['ratio'],s5_info['amp']
             paras_un.add('s5_ratio',value=s5_ratio,vary=False)
@@ -482,7 +484,7 @@ for energy_start in [2510,2515,2520]:
             
             #deconvolve for s6
             paras['arctan_center'].set(value=inflection(norm.Energy,norm['s6_norm_mu']),vary=False)
-            paras['arctan_sigma'].set(value=1.0,min=0)
+            paras['arctan_sigma'].set(value=1.0,min=0.01)
             s6_info=show_decon_known(norm['s6_norm_mu'],[2478.79,2484.32,2494.86])
             s6_ratio,s6_amp=s6_info['ratio'],s6_info['amp']
             paras_un.add('s6_ratio',value=s6_ratio,vary=False)
@@ -493,14 +495,13 @@ for energy_start in [2510,2515,2520]:
             
             
             #allowed variance of position of peak for each known structure
-            length=0.3
-            
+            length=0.5
             #put constraints on the amplitude
-            paras_un['l2_amplitude'].set(min=0)
-            paras_un['l3_amplitude'].set(min=0)
-            paras_un['l4_amplitude'].set(min=0)
-            paras_un['l5_amplitude'].set(min=0)
-            paras_un['l6_amplitude'].set(min=0)
+            paras_un['l2_amplitude'].set(min=0.0)
+            paras_un['l3_amplitude'].set(min=0.0)
+            paras_un['l4_amplitude'].set(min=0.0)
+            paras_un['l5_amplitude'].set(min=0.0)
+            paras_un['l6_amplitude'].set(min=0.0)
             #set values of center and sigma for arctangent steps
             paras_un['atan2_center'].set(value=inflection(norm.Energy,norm['s2_norm_mu']),vary=False)
             paras_un['atan3_center'].set(value=inflection(norm.Energy,norm['s3_norm_mu']),vary=False)
@@ -508,11 +509,11 @@ for energy_start in [2510,2515,2520]:
             paras_un['atan5_center'].set(value=inflection(norm.Energy,norm['s5_norm_mu']),vary=False)
             paras_un['atan6_center'].set(value=inflection(norm.Energy,norm['s6_norm_mu']),vary=False)
             #determine the ratio of sigma and amplitude and add that into paras
-            paras_un['atan2_sigma'].set(expr='s2_ratio*atan2_amplitude')
-            paras_un['atan3_sigma'].set(expr='s3_ratio*atan3_amplitude')
-            paras_un['atan4_sigma'].set(expr='s4_ratio*atan4_amplitude')
-            paras_un['atan5_sigma'].set(expr='s5_ratio*atan5_amplitude')
-            paras_un['atan6_sigma'].set(expr='s6_ratio*atan6_amplitude')
+            paras_un['atan2_sigma'].set(expr='s2_ratio')
+            paras_un['atan3_sigma'].set(expr='s3_ratio')
+            paras_un['atan4_sigma'].set(expr='s4_ratio')
+            paras_un['atan5_sigma'].set(expr='s5_ratio')
+            paras_un['atan6_sigma'].set(expr='s6_ratio')
             
             #set centers and guess other attributes of Lorentzians
             paras_un.update(lor2.guess(norm['s2_norm_mu'],x=norm['Energy'],center=s2_cen))
@@ -531,21 +532,18 @@ for energy_start in [2510,2515,2520]:
             paras_un['l6_center'].set(value=s6_cen,min=s6_cen-length,max=s6_cen+length)
             
             #put the constraint on arc tangent steps 
-            tot_area=paras_un['l2_amplitude'].value
-            tot_area=tot_area+paras_un['l3_amplitude'].value
-            tot_area=tot_area+paras_un['l4_amplitude'].value
-            tot_area=tot_area+paras_un['l5_amplitude'].value
-            tot_area=tot_area+paras_un['l6_amplitude'].value
-            paras_un.add('tot_area',value=tot_area)
+            paras_un.add('tot_area',expr='l2_amplitude+l3_amplitude+l4_amplitude+l5_amplitude+l6_amplitude')
             # print(paras)
             paras_un['atan2_amplitude'].set(expr='l2_amplitude/tot_area')
             paras_un['atan3_amplitude'].set(expr='l3_amplitude/tot_area')
             paras_un['atan4_amplitude'].set(expr='l4_amplitude/tot_area')
             paras_un['atan5_amplitude'].set(expr='l5_amplitude/tot_area')
             paras_un['atan6_amplitude'].set(expr='l6_amplitude/tot_area')
-            # print(paras)
-            # print(paras['tot_area'])
-            paras_un['tot_area'].set(value=tot_area)
+            paras_un['l2_amplitude'].set(min=0.0,max=1.0)
+            paras_un['l3_amplitude'].set(min=0.0,max=1.0)
+            paras_un['l4_amplitude'].set(min=0.0,max=1.0)
+            paras_un['l5_amplitude'].set(min=0.0,max=1.0)
+            paras_un['l6_amplitude'].set(expr='s6_amp*(1-(l2_amplitude/s2_amp)-(l3_amplitude/s3_amp)-(l4_amplitude/s4_amp)-(l5_amplitude/s5_amp))')
             out=model.fit(norm['s1_norm_mu'],paras_un,x=norm.Energy)
             # print(out.fit_report())
             #calculate the coefficients
@@ -596,3 +594,5 @@ res_coef.to_excel(r'C:\Users\lenovo\OneDrive\桌面\res_coef.xlsx', index = Fals
 speak=win32com.client.Dispatch('SAPI.SPVOICE')
 winsound.Beep(2015,3000)
 speak.Speak('Program Terminated Sucessfully. Please check the result!')
+toaster = ToastNotifier()
+toaster.show_toast("Program Terminated Successfully","You spend in total"+"%s seconds"% (time.time() - start_time))
