@@ -105,7 +105,7 @@ def decon_known(df,center):
         this=make_lor(df,i,center,2.0)['model']
         mod=mod+this
         paras.update(make_lor(df,i,center,2.0)['paras'])
-    out=mod.fit(df,params=paras,x=norm.Energy,weights=df)
+    out=mod.fit(df,params=paras,x=norm.Energy)
     return out
 
 # print(decon_known(norm['s2_norm_mu'],[2472.5,2475.4,2478.9,2483.2]).fit_report())
