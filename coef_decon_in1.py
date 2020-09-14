@@ -23,7 +23,7 @@ s5 = pd.read_excel (r'C:\Users\lenovo\OneDrive\桌面\Physics\Pioneer Academics\
 s6 = pd.read_excel (r'C:\Users\lenovo\OneDrive\桌面\Physics\Pioneer Academics\Independent Project\Data\sdbso2.xlsx')
 #define the start and legth of post-edge
 for energy_start in [2510]:
-    for energy_end in [2530]:
+    for energy_end in [2525]:
         if energy_end > energy_start:
             def back_subs(df, end, num):
                 """
@@ -202,12 +202,12 @@ for energy_start in [2510]:
             s6_start=close_index(s6['Energy'],energy_start)
             s6_end=close_index(s6['Energy'],energy_end)
             
-            s1["mu_norm"]=normalization(s1,close_index(s1['Energy'],energy_start),close_index(s1['Energy'],energy_end))[0]
-            s2["mu_norm"]=normalization(s2,close_index(s2['Energy'],energy_start),close_index(s2['Energy'],energy_end))[0]
-            s3["mu_norm"]=normalization(s3, close_index(s3['Energy'],energy_start),close_index(s3['Energy'],energy_end))[0]
-            s4["mu_norm"]=normalization(s4, close_index(s4['Energy'],energy_start),close_index(s4['Energy'],energy_end))[0]
-            s5["mu_norm"]=normalization(s5, close_index(s5['Energy'],energy_start),close_index(s5['Energy'],energy_end))[0]
-            s6["mu_norm"]=normalization(s6,s6_start,s6_end)[0]
+            s1["mu_norm"]=normalization1(s1,close_index(s1['Energy'],energy_start),close_index(s1['Energy'],energy_end))[0]
+            s2["mu_norm"]=normalization1(s2,close_index(s2['Energy'],energy_start),close_index(s2['Energy'],energy_end))[0]
+            s3["mu_norm"]=normalization1(s3, close_index(s3['Energy'],energy_start),close_index(s3['Energy'],energy_end))[0]
+            s4["mu_norm"]=normalization1(s4, close_index(s4['Energy'],energy_start),close_index(s4['Energy'],energy_end))[0]
+            s5["mu_norm"]=normalization1(s5, close_index(s5['Energy'],energy_start),close_index(s5['Energy'],energy_end))[0]
+            s6["mu_norm"]=normalization1(s6,s6_start,s6_end)[0]
             
             #define the start and end of spectra calculating chi2
             start_energy=2461
@@ -362,7 +362,7 @@ for energy_start in [2510]:
                 name=pref+'center'
                 paras[name].set(value=center[num],min=center[num]-length,max=center[num]+length)
                 paras[pref+'amplitude'].set(min=0.0)
-                paras[pref+'sigma'].set(min=0.0)
+                paras[pref+'sigma'].set(min=0.0,max=3.0)
                 return {'model':model,'paras':paras}
             def decon_known(df,center):
                 """
@@ -390,13 +390,13 @@ for energy_start in [2510]:
                 paras.update(arctan_mod.make_params())
                 paras['arctan_center'].set(value=inflection(norm.Energy,df),vary=False,min=0.0)
                 paras['arctan_amplitude'].set(value=1.0,vary=False)
-                paras['arctan_sigma'].set(value=1.0,min=0.0)
+                paras['arctan_sigma'].set(value=1.0,min=0.0,max=3.0)
                 mod=arctan_mod
                 for i in range(len(center)):
-                    this=make_lor(df,i,center,0.7)['model']
+                    this=make_lor(df,i,center,2.0)['model']
                     mod=mod+this
-                    paras.update(make_lor(df,i,center,0.7)['paras'])
-                out=mod.fit(df,params=paras,x=norm.Energy)
+                    paras.update(make_lor(df,i,center,2.0)['paras'])
+                out=mod.fit(df,params=paras,x=norm.Energy,weights=df)
                 return {'out':out}
             
             # print(decon_known(norm['s2_norm_mu'],[2472.5,2475.4,2478.9,2483.2]).fit_report())
@@ -496,7 +496,7 @@ for energy_start in [2510]:
             
             
             #allowed variance of position of peak for each known structure
-            length=0.2
+            length=0.3
             #put constraints on the amplitude
             paras_un['l2_amplitude'].set(min=0.0)
             paras_un['l3_amplitude'].set(min=0.0)
@@ -540,11 +540,11 @@ for energy_start in [2510]:
             paras_un['atan4_amplitude'].set(expr='l4_amplitude/tot_area')
             paras_un['atan5_amplitude'].set(expr='l5_amplitude/tot_area')
             paras_un['atan6_amplitude'].set(expr='l6_amplitude/tot_area')
-            paras_un['l2_amplitude'].set(min=0.0)
-            paras_un['l3_amplitude'].set(min=0.0)
-            paras_un['l4_amplitude'].set(min=0.0)
-            paras_un['l5_amplitude'].set(min=0.0)
-            paras_un['l6_amplitude'].set(expr='s6_amp*(1-(l2_amplitude/s2_amp)-(l3_amplitude/s3_amp)-(l4_amplitude/s4_amp)-(l5_amplitude/s5_amp))',min=0.0)
+            paras_un['l2_amplitude'].set(min=0.0,max=paras_un['s2_amp'])
+            paras_un['l3_amplitude'].set(min=0.0,max=paras_un['s3_amp'])
+            paras_un['l4_amplitude'].set(min=0.0,max=paras_un['s4_amp'])
+            paras_un['l5_amplitude'].set(min=0.0,max=paras_un['s5_amp'])
+            paras_un['l6_amplitude'].set(min=0.0,expr='s6_amp*(1-(l2_amplitude/s2_amp)-(l3_amplitude/s3_amp)-(l4_amplitude/s4_amp)-(l5_amplitude/s5_amp))')
             out=model.fit(norm['s1_norm_mu'],paras_un,x=norm.Energy)
             # print(out.fit_report())
             #calculate the coefficients
@@ -592,7 +592,7 @@ for energy_start in [2510]:
                                       'chi2': out.chisqr},ignore_index=True)
             
             print("--- %s seconds ---" % (time.time() - start_time))
-# res_coef.to_excel(r'C:\Users\lenovo\OneDrive\桌面\res_coef.xlsx', index = False, header=True)
+#res_coef.to_excel(r'C:\Users\lenovo\OneDrive\桌面\res_coef.xlsx', index = False, header=True)
 speak=win32com.client.Dispatch('SAPI.SPVOICE')
 #play sound on this computer
 # winsound.Beep(2015,3000)

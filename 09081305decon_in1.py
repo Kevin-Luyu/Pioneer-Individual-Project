@@ -23,7 +23,7 @@ s5 = pd.read_excel (r'C:\Users\lenovo\OneDrive\桌面\Physics\Pioneer Academics\
 s6 = pd.read_excel (r'C:\Users\lenovo\OneDrive\桌面\Physics\Pioneer Academics\Independent Project\Data\sdbso2.xlsx')
 #define the start and legth of post-edge
 for energy_start in [2510]:
-    for energy_end in [2530]:
+    for energy_end in [2525]:
         if energy_end > energy_start:
             def back_subs(df, end, num):
                 """
@@ -544,7 +544,7 @@ for energy_start in [2510]:
             paras_un['l3_amplitude'].set(min=0.0)
             paras_un['l4_amplitude'].set(min=0.0)
             paras_un['l5_amplitude'].set(min=0.0)
-            paras_un['l6_amplitude'].set(expr='s6_amp*(1-(l2_amplitude/s2_amp)-(l3_amplitude/s3_amp)-(l4_amplitude/s4_amp)-(l5_amplitude/s5_amp))')
+            paras_un['l6_amplitude'].set(expr='s6_amp*(1-(l2_amplitude/s2_amp)-(l3_amplitude/s3_amp)-(l4_amplitude/s4_amp)-(l5_amplitude/s5_amp))',min=0)
             out=model.fit(norm['s1_norm_mu'],paras_un,x=norm.Energy)
             # print(out.fit_report())
             #calculate the coefficients
@@ -592,7 +592,7 @@ for energy_start in [2510]:
                                       'chi2': out.chisqr},ignore_index=True)
             
             print("--- %s seconds ---" % (time.time() - start_time))
-res_coef.to_excel(r'C:\Users\lenovo\OneDrive\桌面\res_coef.xlsx', index = False, header=True)
+#res_coef.to_excel(r'C:\Users\lenovo\OneDrive\桌面\res_coef.xlsx', index = False, header=True)
 speak=win32com.client.Dispatch('SAPI.SPVOICE')
 #play sound on this computer
 # winsound.Beep(2015,3000)
