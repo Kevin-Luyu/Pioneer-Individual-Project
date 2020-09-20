@@ -10,7 +10,8 @@ import win32com.client
 import winsound
 from win10toast import ToastNotifier
 from pushover import init, Client
-#import excel files and construct numpy array
+#import excel files and construct numpy array； 
+#please change the string "location" in line 19-24 to the real location on your computer where the xlsx file is at 
 
 res_coef=pd.DataFrame(columns=['Post-edge Energy Range','sdbs034(0)',
                                            'sdbt029(0)','dbso042(+2)','sdbso2(+2)',
@@ -202,12 +203,12 @@ for energy_start in [2510]:
             s6_start=close_index(s6['Energy'],energy_start)
             s6_end=close_index(s6['Energy'],energy_end)
             
-            s1["mu_norm"]=normalization1(s1,close_index(s1['Energy'],energy_start),close_index(s1['Energy'],energy_end))[0]
-            s2["mu_norm"]=normalization1(s2,close_index(s2['Energy'],energy_start),close_index(s2['Energy'],energy_end))[0]
-            s3["mu_norm"]=normalization1(s3, close_index(s3['Energy'],energy_start),close_index(s3['Energy'],energy_end))[0]
-            s4["mu_norm"]=normalization1(s4, close_index(s4['Energy'],energy_start),close_index(s4['Energy'],energy_end))[0]
-            s5["mu_norm"]=normalization1(s5, close_index(s5['Energy'],energy_start),close_index(s5['Energy'],energy_end))[0]
-            s6["mu_norm"]=normalization1(s6,s6_start,s6_end)[0]
+            s1["mu_norm"]=normalization(s1,close_index(s1['Energy'],energy_start),close_index(s1['Energy'],energy_end))[0]
+            s2["mu_norm"]=normalization(s2,close_index(s2['Energy'],energy_start),close_index(s2['Energy'],energy_end))[0]
+            s3["mu_norm"]=normalization(s3, close_index(s3['Energy'],energy_start),close_index(s3['Energy'],energy_end))[0]
+            s4["mu_norm"]=normalization(s4, close_index(s4['Energy'],energy_start),close_index(s4['Energy'],energy_end))[0]
+            s5["mu_norm"]=normalization(s5, close_index(s5['Energy'],energy_start),close_index(s5['Energy'],energy_end))[0]
+            s6["mu_norm"]=normalization(s6,s6_start,s6_end)[0]
             
             #define the start and end of spectra calculating chi2
             start_energy=2461
@@ -362,7 +363,7 @@ for energy_start in [2510]:
                 name=pref+'center'
                 paras[name].set(value=center[num],min=center[num]-length,max=center[num]+length)
                 paras[pref+'amplitude'].set(min=0.0)
-                paras[pref+'sigma'].set(min=0.0,max=3.0)
+                paras[pref+'sigma'].set(min=0.01)
                 return {'model':model,'paras':paras}
             def decon_known(df,center):
                 """
@@ -390,7 +391,7 @@ for energy_start in [2510]:
                 paras.update(arctan_mod.make_params())
                 paras['arctan_center'].set(value=inflection(norm.Energy,df),vary=False,min=0.0)
                 paras['arctan_amplitude'].set(value=1.0,vary=False)
-                paras['arctan_sigma'].set(value=1.0,min=0.0,max=3.0)
+                paras['arctan_sigma'].set(value=1.0,min=0.01)
                 mod=arctan_mod
                 for i in range(len(center)):
                     this=make_lor(df,i,center,2.0)['model']
@@ -444,7 +445,7 @@ for energy_start in [2510]:
             # deconvolute for s2
             paras['arctan_center'].set(value=inflection(norm.Energy,norm['s2_norm_mu']),vary=False)
             paras['arctan_amplitude'].set(value=1.0,vary=False)
-            paras['arctan_sigma'].set(value=1.0,min=0.0)
+            paras['arctan_sigma'].set(value=1.0,min=0.01)
             s2_info=show_decon_known(norm['s2_norm_mu'],[2472.5,2475.4,2478.9,2483.2])
             s2_ratio,s2_amp=s2_info['ratio'],s2_info['amp']
             s2_cen=s2_info['center']
@@ -455,7 +456,7 @@ for energy_start in [2510]:
             
             #deconvolve for s3
             paras['arctan_center'].set(value=inflection(norm.Energy,norm['s3_norm_mu']),vary=False)
-            paras['arctan_sigma'].set(value=1.0,min=0.0)
+            paras['arctan_sigma'].set(value=1.0,min=0.01)
             s3_info = show_decon_known(norm['s3_norm_mu'],[2475.26,2478.20,2489.90,2484.52])
             s3_ratio,s3_amp=s3_info['ratio'],s3_info['amp']
             paras_un.add('s3_ratio',value=s3_ratio,vary=False)
@@ -465,7 +466,7 @@ for energy_start in [2510]:
             
             #deconvolve for s4
             paras['arctan_center'].set(value=inflection(norm.Energy,norm['s4_norm_mu']),vary=False)
-            paras['arctan_sigma'].set(value=1.0,min=0.0)
+            paras['arctan_sigma'].set(value=1.0,min=0.01)
             s4_info=show_decon_known(norm['s4_norm_mu'],[2473.05,2476.22,2481.59])
             s4_ratio,s4_amp=s4_info['ratio'],s4_info['amp']
             paras_un.add('s4_ratio',value=s4_ratio,vary=False)
@@ -475,7 +476,7 @@ for energy_start in [2510]:
             
             #deconvolve for s5
             paras['arctan_center'].set(value=inflection(norm.Energy,norm['s5_norm_mu']),vary=False)
-            paras['arctan_sigma'].set(value=1.0,min=0.0)
+            paras['arctan_sigma'].set(value=1.0,min=0.01)
             s5_info=show_decon_known(norm['s5_norm_mu'],[2481.76,2497.41])
             s5_ratio,s5_amp=s5_info['ratio'],s5_info['amp']
             paras_un.add('s5_ratio',value=s5_ratio,vary=False)
@@ -485,7 +486,7 @@ for energy_start in [2510]:
             
             #deconvolve for s6
             paras['arctan_center'].set(value=inflection(norm.Energy,norm['s6_norm_mu']),vary=False)
-            paras['arctan_sigma'].set(value=1.0,min=0.0)
+            paras['arctan_sigma'].set(value=1.0,min=0.01)
             s6_info=show_decon_known(norm['s6_norm_mu'],[2478.79,2484.32,2494.86])
             s6_ratio,s6_amp=s6_info['ratio'],s6_info['amp']
             paras_un.add('s6_ratio',value=s6_ratio,vary=False)
@@ -540,11 +541,11 @@ for energy_start in [2510]:
             paras_un['atan4_amplitude'].set(expr='l4_amplitude/tot_area')
             paras_un['atan5_amplitude'].set(expr='l5_amplitude/tot_area')
             paras_un['atan6_amplitude'].set(expr='l6_amplitude/tot_area')
-            paras_un['l2_amplitude'].set(min=0.0,max=paras_un['s2_amp'])
-            paras_un['l3_amplitude'].set(min=0.0,max=paras_un['s3_amp'])
-            paras_un['l4_amplitude'].set(min=0.0,max=paras_un['s4_amp'])
-            paras_un['l5_amplitude'].set(min=0.0,max=paras_un['s5_amp'])
-            paras_un['l6_amplitude'].set(min=0.0,expr='s6_amp*(1-(l2_amplitude/s2_amp)-(l3_amplitude/s3_amp)-(l4_amplitude/s4_amp)-(l5_amplitude/s5_amp))')
+            paras_un['l2_amplitude'].set(min=0.0)
+            paras_un['l3_amplitude'].set(min=0.0)
+            paras_un['l4_amplitude'].set(min=0.0)
+            paras_un['l5_amplitude'].set(min=0.0)
+            paras_un['l6_amplitude'].set(expr='s6_amp*(1-(l2_amplitude/s2_amp)-(l3_amplitude/s3_amp)-(l4_amplitude/s4_amp)-(l5_amplitude/s5_amp))',min=0)
             out=model.fit(norm['s1_norm_mu'],paras_un,x=norm.Energy)
             # print(out.fit_report())
             #calculate the coefficients
